@@ -1,0 +1,9 @@
+.env
+data/epl_current_odds.csv
+data/Fixtures.csv
+data/Results.csv
+data/Table.csv
+data/*.csv
+
+__pycache__/
+*.pyc
