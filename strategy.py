@@ -1,5 +1,7 @@
 import pandas as pd
 from derby import derby_intensity
+from team_strength import is_weak_team
+
 
 # =====================
 # 0. Config / Tags
@@ -101,6 +103,23 @@ def filter_lms_candidates(candidates: pd.DataFrame, min_safe_p: float = 0.60) ->
             derby_intensity(row["team"], row["opponent"]) == 0.0
             and row["win_prob"] >= min_safe_p
         )
+    def too_volatile(row):
+        team = row["team"]
+        opp = row["opponent"]
+        p = row["win_prob"]
+
+        if team in HIGH_VARIANCE_TEAMS:
+            # If opponent is genuinely weak (bottom 5), allow even if p is moderate
+            if is_weak_team(opp, bottom_n=5):
+                return False
+
+        # Otherwise require a higher probability to trust a volatile side
+        if p < 0.72:
+            return True
+
+        return False
+    
+    candidates = candidates[~candidates.apply(too_volatile, axis=1)]
 
     safe_non_derby_mask = candidates.apply(is_safe_non_derby, axis=1)
     safe_non_derby_exists = safe_non_derby_mask.any()
