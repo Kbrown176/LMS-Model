@@ -1,5 +1,11 @@
 import pandas as pd
 from elo import load_elo_table
+from strategy import (
+    build_candidate_picks,
+    run_10_week_strategy,
+    print_strategy_path,
+)
+from future_probs import fill_missing_probs_with_elo
 
 # Paths
 ODDS_PATH = "data/epl_current_odds.csv"
@@ -7,26 +13,49 @@ FIXTURES_PATH = "data/Fixtures.csv"
 
 # Team name cleaning map
 TEAM_CLEAN = {
+    # Spurs
     "Tottenham Hotspurs": "Tottenham",
     "Tottenham Hotspur": "Tottenham",
     "Spurs": "Tottenham",
 
+    # Man United
     "Man Utd": "Manchester United",
     "Man United": "Manchester United",
     "Manchester Utd": "Manchester United",
+    "Manchester United": "Manchester United",
 
+    # Man City
     "Man City": "Manchester City",
     "Manchester City": "Manchester City",
 
+    # Wolves
     "Wolves": "Wolverhampton Wanderers",
     "Wolverhampton": "Wolverhampton Wanderers",
     "Wolverhampton W.": "Wolverhampton Wanderers",
 
-    "West Ham Utd": "West Ham United",
+    # West Ham
+    "West Ham": "West Ham",
+    "West Ham Utd": "West Ham",
+    "West Ham United": "West Ham",
 
+    # Leeds
     "Leeds": "Leeds United",
     "Leeds Utd": "Leeds United",
     "Leeds United": "Leeds United",
+
+    # Brighton
+    "Brighton": "Brighton",
+    "Brighton & Hove Albion": "Brighton",
+    "Brighton and Hove Albion": "Brighton",
+
+    # Nottingham Forest
+    "Nott'm Forest": "Nottingham Forest",
+    "Nottingham Forest": "Nottingham Forest",
+
+    # Newcastle
+    "Newcastle": "Newcastle United",
+    "Newcastle Utd": "Newcastle United",
+    "Newcastle United": "Newcastle United",
 }
 
 
@@ -67,46 +96,6 @@ def add_win_probabilities(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def build_candidate_picks(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    For a given set of fixtures (e.g. one gameweek),
-    create candidate LMS picks:
-      - Pick the home team (prob = p_home_win)
-      - Pick the away team (prob = p_away_win)
-    """
-    rows = []
-    for _, r in df.iterrows():
-        if pd.isna(r.get("p_home_win")) or pd.isna(r.get("p_away_win")):
-            continue
-
-        rows.append(
-            {
-                "team": r["home_clean"],
-                "opponent": r["away_clean"],
-                "is_home": True,
-                "win_prob": r["p_home_win"],
-                "kickoff": r["kickoff_utc"],
-                "Round": r.get("Round", None),
-            }
-        )
-
-        rows.append(
-            {
-                "team": r["away_clean"],
-                "opponent": r["home_clean"],
-                "is_home": False,
-                "win_prob": r["p_away_win"],
-                "kickoff": r["kickoff_utc"],
-                "Round": r.get("Round", None),
-            }
-        )
-
-    candidates = pd.DataFrame(rows)
-    if not candidates.empty:
-        candidates = candidates.sort_values("win_prob", ascending=False)
-    return candidates
-
-
 def clean_and_merge(odds_path: str, fixtures_path: str) -> pd.DataFrame:
     """
     - Load odds and fixtures
@@ -132,8 +121,15 @@ def clean_and_merge(odds_path: str, fixtures_path: str) -> pd.DataFrame:
 
     # We only really need the odds columns + kickoff from the odds file
     odds_small = odds[
-        ["date_clean", "home_clean", "away_clean",
-         "home_odds", "draw_odds", "away_odds", "kickoff_utc"]
+        [
+            "date_clean",
+            "home_clean",
+            "away_clean",
+            "home_odds",
+            "draw_odds",
+            "away_odds",
+            "kickoff_utc",
+        ]
     ]
 
     # IMPORTANT: base = fixtures (full season), left join odds onto it
@@ -143,201 +139,11 @@ def clean_and_merge(odds_path: str, fixtures_path: str) -> pd.DataFrame:
         how="left",
     )
 
-
     return merged
 
 
-# ---------- 10-WEEK STRATEGY HELPERS ---------- #
-
-def plan_future_path(
-    merged: pd.DataFrame,
-    start_gw: int,
-    horizon: int,
-    used_teams: list,
-    first_pick_row: pd.Series,
-) -> list[dict]:
-    """
-    Build a sequence of picks for the next `horizon` gameweeks,
-    forcing `first_pick_row` in `start_gw`, then greedy best available thereafter.
-
-    Returns a list of dicts:
-      {"gw", "team", "opponent", "is_home", "win_prob", "kickoff"}
-    """
-    path = []
-    used = set(used_teams)
-
-    # First week = the forced starting pick
-    team = first_pick_row["team"]
-    opponent = first_pick_row["opponent"]
-    is_home = bool(first_pick_row["is_home"])
-    win_prob = float(first_pick_row["win_prob"])
-    kickoff = first_pick_row["kickoff"]
-
-    path.append(
-        {
-            "gw": start_gw,
-            "team": team,
-            "opponent": opponent,
-            "is_home": is_home,
-            "win_prob": win_prob,
-            "kickoff": kickoff,
-        }
-    )
-    used.add(team)
-
-    # Future weeks
-    for gw in range(start_gw + 1, start_gw + horizon):
-        gw_df = merged[merged["Round"] == gw]
-        if gw_df.empty:
-            break
-
-        candidates = build_candidate_picks(gw_df)
-        if candidates.empty:
-            break
-
-        # filter out used
-        candidates = candidates[~candidates["team"].isin(used)]
-        if candidates.empty:
-            break
-
-        best = candidates.iloc[0]
-
-        path.append(
-            {
-                "gw": gw,
-                "team": best["team"],
-                "opponent": best["opponent"],
-                "is_home": bool(best["is_home"]),
-                "win_prob": float(best["win_prob"]),
-                "kickoff": best["kickoff"],
-            }
-        )
-        used.add(best["team"])
-
-    return path
-
-def survival_prob_from_win_probs(win_probs: list[float], lives: int) -> float:
-    """
-    Given a sequence of weekly win probabilities and a number of lives,
-    compute probability of still having at least 1 life after all weeks.
-
-    Draw counts as a loss, so "loss" prob each week = 1 - win_prob.
-    This uses a small DP over the number of losses (Poisson-binomial).
-    """
-    L = max(1, lives)
-
-    # dp[k] = probability of exactly k losses so far (k = 0..L)
-    dp = [0.0] * (L + 1)
-    dp[0] = 1.0
-
-    for w in win_probs:
-        q = 1.0 - w  # loss prob
-
-        new_dp = [0.0] * (L + 1)
-        for k in range(L + 1):
-            # No loss this week: stays at k losses
-            new_dp[k] += dp[k] * w
-
-            # Loss this week: k -> k+1 (cap at L)
-            if k + 1 <= L:
-                new_dp[k + 1] += dp[k] * q
-
-        dp = new_dp
-
-    # Survive if total losses <= lives - 1
-    # (e.g. with 2 lives, you die on 2nd loss -> survive with 0 or 1 loss)
-    cutoff = max(0, lives - 1)
-    cutoff = min(cutoff, L)
-    return sum(dp[: cutoff + 1])
-
-
-def run_10_week_strategy(
-    merged: pd.DataFrame,
-    target_gw: int,
-    used_teams: list,
-    lives: int,
-    horizon: int = 10,
-) -> pd.DataFrame:
-    """
-    For the given gameweek, evaluate each possible pick as the starting choice
-    of a 10-week plan, assuming future weeks are picked greedily.
-
-    Returns a DataFrame with columns:
-      team, opponent, is_home, this_week_win, survival_next_10_weeks, path
-    where 'path' is a list of dicts describing the week-by-week picks.
-    """
-    gw_df = merged[merged["Round"] == target_gw]
-    if gw_df.empty:
-        print(f"No fixtures found for Round {target_gw} in 10-week strategy.")
-        return pd.DataFrame()
-
-    base_candidates = build_candidate_picks(gw_df)
-
-    used_clean = [clean_team(t) for t in used_teams]
-    if used_clean:
-        base_candidates = base_candidates[~base_candidates["team"].isin(used_clean)]
-
-    if base_candidates.empty:
-        print("No candidates available this week after filtering used teams.")
-        return pd.DataFrame()
-
-    rows = []
-
-    for _, row in base_candidates.iterrows():
-        team = row["team"]
-        opponent = row["opponent"]
-        this_w = float(row["win_prob"])
-
-        # Build full path of picks for this starting choice
-        path = plan_future_path(
-            merged=merged,
-            start_gw=target_gw,
-            horizon=horizon,
-            used_teams=used_clean,
-            first_pick_row=row,
-        )
-
-        win_probs = [step["win_prob"] for step in path]
-        surv = survival_prob_from_win_probs(win_probs, lives)
-
-        rows.append(
-            {
-                "team": team,
-                "opponent": opponent,
-                "is_home": row["is_home"],
-                "this_week_win": this_w,
-                "survival_next_10_weeks": surv,
-                "kickoff": row["kickoff"],
-                "path": path,  # store the full path as an object
-            }
-        )
-
-    out = pd.DataFrame(rows)
-    if not out.empty:
-        out = out.sort_values("survival_next_10_weeks", ascending=False)
-
-    return out
-
-def print_strategy_path(path: list[dict], lives: int):
-    """
-    Pretty-print the recommended 10-week path.
-    """
-    print("\nPlanned 10-week path:\n")
-    for step in path:
-        gw = step["gw"]
-        team = step["team"]
-        opp = step["opponent"]
-        is_home = step["is_home"]
-        w = step["win_prob"]
-
-        venue = "H" if is_home else "A"
-        print(
-            f"GW {gw}: {team} ({venue}) vs {opp}  |  Win prob: {w:.3f}"
-        )
-    print(f"\nAssumes you start with {lives} lives and draws = loss.\n")
-
-
 # ===================== MAIN FUNCTION ===================== #
+
 
 def main():
     # --- USER INPUTS ---
@@ -368,26 +174,26 @@ def main():
     # 1. Merge odds + fixtures and attach Round
     merged = clean_and_merge(ODDS_PATH, FIXTURES_PATH)
 
+    # --- Sanity checks before Elo fallback ---
+    total_rows = len(merged)
+    missing_before = merged["home_odds"].isna().sum()
+    print(f"\n[INFO] Fixtures loaded: {total_rows}")
+    print(f"[INFO] Missing bookmaker odds before Elo fallback: {missing_before}")
+
     # 2. Add win probabilities from bookmaker odds
     merged = add_win_probabilities(merged)
 
     # 2.5 ELO fallback for missing odds
     elo_table = load_elo_table("data/elo.csv")
+    merged = fill_missing_probs_with_elo(merged, elo_table)
 
-    for idx, row in merged.iterrows():
-        if pd.isna(row["p_home_win"]):
-            home = row["home_clean"]
-            away = row["away_clean"]
+    # --- Sanity checks after Elo fallback ---
+    missing_after = merged["p_home_win"].isna().sum()
+    elo_filled = (merged["prob_source"] == "elo").sum()
+    print(f"[INFO] Fixtures using Elo fallback: {elo_filled}")
+    if missing_after > 0:
+        print(f"[WARNING] {missing_after} fixtures STILL have no probabilities!")
 
-            if home in elo_table and away in elo_table:
-                R_home = elo_table[home] + 100  # home advantage
-                R_away = elo_table[away]
-
-                p_home = 1 / (1 + 10 ** ((R_away - R_home) / 400))
-                p_away = 1 - p_home
-
-                merged.at[idx, "p_home_win"] = p_home
-                merged.at[idx, "p_away_win"] = p_away
 
     # --- 1-WEEK RECOMMENDATIONS (current GW) ---
 
@@ -431,19 +237,22 @@ def main():
         if strat_df.empty:
             return
 
-        print(f"\n10-week strategy suggestions starting GW {TARGET_GW} (lives = {lives}):\n")
+        print(
+            f"\n10-week strategy suggestions starting GW {TARGET_GW} (lives = {lives}):\n"
+        )
         print(
             strat_df[
-                ["team", "opponent", "is_home", "this_week_win", "survival_next_10_weeks"]
+                ["team", "opponent", "is_home", "this_week_win", "worst_week", "avg_week", "survival_next_10_weeks", "score"]
             ]
             .head(10)
-            .to_string(index=False,
-                       float_format=lambda x: f"{x:.3f}")
+            .to_string(index=False, float_format=lambda x: f"{x:.3f}")
         )
-# NEW: show the full path for the best starting pick
+
+        # Show the full path for the best starting pick
         best = strat_df.iloc[0]
         best_path = best["path"]
         print_strategy_path(best_path, lives)
+
 
 if __name__ == "__main__":
     main()

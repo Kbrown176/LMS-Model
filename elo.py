@@ -1,7 +1,7 @@
 import math
 import pandas as pd
 
-HOME_ADVANTAGE = 100  # Elo points
+HOME_ADVANTAGE = 80  # Elo points
 
 def load_elo_table(path="data/elo.csv"):
     """Loads a CSV with columns: Team, Rating"""
