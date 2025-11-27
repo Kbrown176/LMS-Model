@@ -1,6 +1,8 @@
 import pandas as pd
 from derby import derby_intensity
 from team_strength import is_weak_team
+import importlib, strategy
+importlib.reload(strategy)
 
 
 # =====================
@@ -97,12 +99,13 @@ def filter_lms_candidates(candidates: pd.DataFrame, min_safe_p: float = 0.60) ->
     if candidates.empty:
         return candidates
 
-    # 2) Check if there exists a SAFE non-derby cand with p >= threshold
+    # 2) Helper predicates
     def is_safe_non_derby(row):
         return (
             derby_intensity(row["team"], row["opponent"]) == 0.0
             and row["win_prob"] >= min_safe_p
         )
+
     def too_volatile(row):
         team = row["team"]
         opp = row["opponent"]
@@ -118,20 +121,21 @@ def filter_lms_candidates(candidates: pd.DataFrame, min_safe_p: float = 0.60) ->
             return True
 
         return False
-    
-    candidates = candidates[~candidates.apply(too_volatile, axis=1)]
 
+    # Drop too volatile picks
+    candidates = candidates[~candidates.apply(too_volatile, axis=1)]
+    if candidates.empty:
+        return candidates
+
+    # Safe non-derby mask (one value per row)
     safe_non_derby_mask = candidates.apply(is_safe_non_derby, axis=1)
-    safe_non_derby_exists = safe_non_derby_mask.any()
+
+    # Make absolutely sure this is a plain bool for the if-statement
+    safe_non_derby_exists = bool(safe_non_derby_mask.any())
 
     if safe_non_derby_exists:
-        # If we have any decent non-derby options, BAN all derbies
-        candidates = candidates[
-            candidates.apply(
-                lambda r: derby_intensity(r["team"], r["opponent"]) == 0.0,
-                axis=1,
-            )
-        ]
+        # We have at least one safe non-derby: only keep those
+        candidates = candidates[safe_non_derby_mask]
     else:
         # No safe non-derby options:
         # Allow derbies, but only if the picked side is elite;
@@ -145,6 +149,7 @@ def filter_lms_candidates(candidates: pd.DataFrame, min_safe_p: float = 0.60) ->
         ]
 
     return candidates
+
 
 
 # =====================
