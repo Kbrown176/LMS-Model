@@ -17,6 +17,7 @@ TOP_SIDES = {
     "Manchester United",
     "Chelsea",
     "Tottenham",
+    
 }
 
 # Rough variance tags – tweak as you like
@@ -37,11 +38,52 @@ MEDIUM_VARIANCE_TEAMS = {
     "West Ham",
     "Leeds United",
 }
-
+# One place to tune behaviour
+SCORING_WEIGHTS = {
+    "safety": 0.55,      # how much we care about win_prob this week
+    "future": 0.25,      # how much we care about saving the team for later
+    "elite": -0.15,      # penalty for burning top sides early
+    "variance": -0.05,   # penalty for high-variance / flakey teams
+}
 
 # =====================
 # 1. Helper penalties
 # =====================
+def team_variance_level(team: str) -> str:
+    if team in HIGH_VARIANCE_TEAMS:
+        return "high"
+    if team in MEDIUM_VARIANCE_TEAMS:
+        return "medium"
+    return "low"
+
+
+def variance_penalty(team: str) -> float:
+    """
+    Return a penalty in [0, 1] for how 'chaotic' the team is.
+    0 = rock solid, 1 = very volatile.
+    """
+    level = team_variance_level(team)
+    if level == "high":
+        return 1.0
+    if level == "medium":
+        return 0.5
+    return 0.0
+
+
+def elite_penalty(team: str, gw: int, total_gw: int = 38) -> float:
+    """
+    Penalise using TOP_SIDES early in the season.
+    Returns something in [0, 1]. Early weeks → bigger penalty.
+    """
+    if team not in TOP_SIDES:
+        return 0.0
+
+    progress = gw / total_gw  # 0 at start, 1 at end
+    # Early weeks (e.g. first half of season) => high penalty that fades later
+    if progress < 0.5:
+        return 1.0 - 2 * progress   # at gw=1 ~1, at gw=19 ~0
+    else:
+        return 0.0
 
 def cautious_score(this_week, ten_week_survival, lives):
     """
