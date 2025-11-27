@@ -17,7 +17,6 @@ TOP_SIDES = {
     "Manchester United",
     "Chelsea",
     "Tottenham",
-    "Newcastle United",
 }
 
 # Rough variance tags – tweak as you like
@@ -264,6 +263,11 @@ def plan_future_path(
     Given a starting pick in start_gw,
     build a greedy path for next `horizon` gameweeks.
     Applies derby + variance penalties to each weekly probability.
+
+    IMPORTANT:
+    - We NEVER skip a gameweek if there is *any* team available.
+    - We first try LMS safety rules; if they leave no candidates,
+      we fall back to the best raw candidate for that week.
     """
     path = []
     used = set(used_teams)
@@ -296,26 +300,35 @@ def plan_future_path(
     used.add(team)
 
     # --- Future weeks ---
+    # horizon = total number of weeks including start_gw,
+    # so we need horizon-1 extra weeks.
     for gw in range(start_gw + 1, start_gw + horizon):
         gw_df = merged[merged["Round"] == gw]
         if gw_df.empty:
+            # no fixtures at all this round -> we genuinely can't pick anyone
             break
 
-        candidates = build_candidate_picks(gw_df)
-        if candidates.empty:
+        # Build all candidates for this GW
+        candidates_all = build_candidate_picks(gw_df)
+        if candidates_all.empty:
             break
 
-        # Filter out already-used teams
-        candidates = candidates[~candidates["team"].isin(used)]
-        if candidates.empty:
+        # Remove already used teams
+        candidates_avail = candidates_all[~candidates_all["team"].isin(used)]
+        if candidates_avail.empty:
+            # all teams have been used already; can't extend further
             break
 
-        # Apply LMS safety rules
-        candidates = filter_lms_candidates(candidates)
-        if candidates.empty:
-            break
+        # Try to apply LMS safety rules
+        safe_candidates = filter_lms_candidates(candidates_avail)
 
-        best = candidates.iloc[0]
+        if not safe_candidates.empty:
+            # Great: pick the best LMS-safe candidate
+            best = safe_candidates.iloc[0]
+        else:
+            # Fallback: **still** pick someone.
+            # Take the best remaining candidate by raw win_prob.
+            best = candidates_avail.sort_values("win_prob", ascending=False).iloc[0]
 
         team = best["team"]
         opponent = best["opponent"]
@@ -344,6 +357,7 @@ def plan_future_path(
         used.add(team)
 
     return path
+
 
 
 # =====================
