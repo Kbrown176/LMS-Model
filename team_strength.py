@@ -2,21 +2,52 @@
 
 import pandas as pd
 
-TABLE_PATH = "data/Table.csv"
+# Match what football_api.refresh_csvs() is writing:
+# if you used "Table.csv" with a capital T there, change this to "data/Table.csv"
+TABLE_PATH = "data/table.csv"
 
-# Map short / messy names in the league table to your canonical names
 TEAM_CLEAN = {
+    # Man City
     "Man City": "Manchester City",
+    "Manchester City": "Manchester City",
+
+    # Man United
     "Man United": "Manchester United",
+    "Man Utd": "Manchester United",
+    "Manchester Utd": "Manchester United",
+    "Manchester United": "Manchester United",
+
+    # Newcastle
     "Newcastle": "Newcastle United",
     "Newcastle ": "Newcastle United",
+    "Newcastle Utd": "Newcastle United",
+    "Newcastle United": "Newcastle United",
+
+    # West Ham
     "West Ham": "West Ham",
     "West Ham ": "West Ham",
+    "West Ham United": "West Ham",
+    "West Ham Utd": "West Ham",
+
+    # Leeds
     "Leeds": "Leeds United",
     "Leeds ": "Leeds United",
+    "Leeds Utd": "Leeds United",
+    "Leeds United": "Leeds United",
+
+    # Forest
     "Nott'm Forest": "Nottingham Forest",
-    # you can add more if your odds/fixtures use other variations
+    "Nottingham Forest": "Nottingham Forest",
+
+    # Spurs
+    "Tottenham": "Tottenham",
+    "Tottenham Hotspur": "Tottenham",
+    "Tottenham Hotspurs": "Tottenham",
+    "Spurs": "Tottenham",
+
+    # You can add more variants here if needed
 }
+
 
 def clean_team(name: str) -> str:
     if not isinstance(name, str):
@@ -29,20 +60,22 @@ def clean_team(name: str) -> str:
 
 _table = pd.read_csv(TABLE_PATH)
 
-# First column = position, second column = team name in your sample
-pos_col = _table.columns[0]      # e.g. 'Unnamed: 0'
-team_col = _table.columns[1]     # e.g. 'Unnamed: 1'
+# New API table has explicit columns: 'position' and 'team'
+if "position" not in _table.columns or "team" not in _table.columns:
+    raise ValueError(
+        f"Expected columns 'position' and 'team' in {TABLE_PATH}, "
+        f"found: {_table.columns.tolist()}"
+    )
 
-# Clean team names to match your main model
-_table[team_col] = _table[team_col].astype(str).apply(clean_team)
+_table["team"] = _table["team"].astype(str).apply(clean_team)
 
-# Build mapping: team -> position (1 = best, 20 = worst)
-_position_by_team = dict(zip(_table[team_col], _table[pos_col]))
+# Map: canonical team name -> league position (1 = best, 20 = worst)
+_position_by_team = dict(zip(_table["team"], _table["position"]))
 
 
 def team_position(team: str) -> int:
     """
-    Returns league position (1-20). If unknown, default to 20 (treat as weak).
+    Returns league position (1–20). If unknown, default to 20 (treat as weak).
     """
     if not isinstance(team, str):
         return 20
@@ -52,6 +85,6 @@ def team_position(team: str) -> int:
 
 def is_weak_team(team: str, bottom_n: int = 5) -> bool:
     """
-    True if team is in the bottom `bottom_n` (e.g. bottom 5 of table).
+    True if team is in the bottom `bottom_n` (e.g. bottom 5 of the table).
     """
     return team_position(team) >= (21 - bottom_n)
