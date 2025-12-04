@@ -16,7 +16,7 @@ TOP_SIDES = {
     "Liverpool",
     "Manchester United",
     "Chelsea",
-    "Tottenham",
+
     
 }
 
@@ -29,7 +29,7 @@ HIGH_VARIANCE_TEAMS = {
 }
 
 MEDIUM_VARIANCE_TEAMS = {
-    "Chelsea",
+
     "Manchester United",
     "Aston Villa",
     "Crystal Palace",
@@ -158,7 +158,7 @@ def filter_lms_candidates(candidates: pd.DataFrame, min_safe_p: float = 0.60) ->
                 return False
 
         # Otherwise require a higher probability to trust a volatile side
-        if p < 0.72:
+        if p < 0.7:
             return True
 
         return False

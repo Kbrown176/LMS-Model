@@ -7,45 +7,74 @@ import pandas as pd
 TABLE_PATH = "data/table.csv"
 
 TEAM_CLEAN = {
+    # Spurs
+    "Tottenham Hotspurs": "Tottenham",
+    "Tottenham Hotspur": "Tottenham",
+    "Tottenham Hotspur FC": "Tottenham",
+    "Spurs": "Tottenham",
+
+    # Man United
+    "Man Utd": "Manchester United",
+    "Man United": "Manchester United",
+    "Manchester Utd": "Manchester United",
+    "Manchester United": "Manchester United",
+    "Manchester United FC": "Manchester United",
+
     # Man City
     "Man City": "Manchester City",
     "Manchester City": "Manchester City",
+    "Manchester City FC": "Manchester City",
 
-    # Man United
-    "Man United": "Manchester United",
-    "Man Utd": "Manchester United",
-    "Manchester Utd": "Manchester United",
-    "Manchester United": "Manchester United",
-
-    # Newcastle
-    "Newcastle": "Newcastle United",
-    "Newcastle ": "Newcastle United",
-    "Newcastle Utd": "Newcastle United",
-    "Newcastle United": "Newcastle United",
+    # Wolves
+    "Wolves": "Wolverhampton Wanderers",
+    "Wolverhampton": "Wolverhampton Wanderers",
+    "Wolverhampton W.": "Wolverhampton Wanderers",
+    "Wolverhampton Wanderers FC": "Wolverhampton Wanderers",
 
     # West Ham
     "West Ham": "West Ham",
     "West Ham ": "West Ham",
-    "West Ham United": "West Ham",
     "West Ham Utd": "West Ham",
+    "West Ham United": "West Ham",
+    "West Ham United FC": "West Ham",
 
     # Leeds
     "Leeds": "Leeds United",
-    "Leeds ": "Leeds United",
     "Leeds Utd": "Leeds United",
     "Leeds United": "Leeds United",
+    "Leeds United FC": "Leeds United",
 
-    # Forest
+
+    # Brighton
+    "Brighton": "Brighton",
+    "Brighton & Hove Albion": "Brighton",
+    "Brighton and Hove Albion": "Brighton",
+    "Brighton & Hove Albion FC": "Brighton",
+
+    # Nottingham Forest
     "Nott'm Forest": "Nottingham Forest",
     "Nottingham Forest": "Nottingham Forest",
+    "Nottingham Forest FC": "Nottingham Forest",
 
-    # Spurs
-    "Tottenham": "Tottenham",
-    "Tottenham Hotspur": "Tottenham",
-    "Tottenham Hotspurs": "Tottenham",
-    "Spurs": "Tottenham",
+    # Newcastle
+    "Newcastle": "Newcastle United",
+    "Newcastle Utd": "Newcastle United",
+    "Newcastle United": "Newcastle United",
+    "Newcastle United FC": "Newcastle United",
 
-    # You can add more variants here if needed
+    # Others from your sample
+    "Sunderland AFC": "Sunderland",
+    "Brentford FC": "Brentford",
+    "Everton FC": "Everton",
+    "Crystal Palace FC": "Crystal Palace",
+    "Aston Villa FC": "Aston Villa",
+    "Chelsea FC": "Chelsea",
+    "Arsenal FC": "Arsenal",
+    "AFC Bournemouth": "Bournemouth",
+    "Fulham FC": "Fulham",
+    "Burnley FC": "Burnley",
+    "Everton FC": "Everton",
+    "Liverpool FC": "Liverpool",
 }
 
 

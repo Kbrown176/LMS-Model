@@ -6,29 +6,77 @@ ELO_OUTPUT_PATH = "data/elo.csv"
 
 # Same cleaning as in main.py so names line up
 TEAM_CLEAN = {
+    # Spurs
     "Tottenham Hotspurs": "Tottenham",
     "Tottenham Hotspur": "Tottenham",
+    "Tottenham Hotspur FC": "Tottenham",
     "Spurs": "Tottenham",
 
+    # Man United
     "Man Utd": "Manchester United",
     "Man United": "Manchester United",
     "Manchester Utd": "Manchester United",
+    "Manchester United": "Manchester United",
+    "Manchester United FC": "Manchester United",
 
+    # Man City
     "Man City": "Manchester City",
     "Manchester City": "Manchester City",
+    "Manchester City FC": "Manchester City",
 
+    # Wolves
     "Wolves": "Wolverhampton Wanderers",
     "Wolverhampton": "Wolverhampton Wanderers",
     "Wolverhampton W.": "Wolverhampton Wanderers",
+    "Wolverhampton Wanderers FC": "Wolverhampton Wanderers",
 
-    "West Ham Utd": "West Ham United",
+    # West Ham
+    "West Ham": "West Ham",
+    "West Ham ": "West Ham",
+    "West Ham Utd": "West Ham",
+    "West Ham United": "West Ham",
+    "West Ham United FC": "West Ham",
 
+    # Leeds
     "Leeds": "Leeds United",
     "Leeds Utd": "Leeds United",
     "Leeds United": "Leeds United",
+    "Leeds United FC": "Leeds United",
+
+
+    # Brighton
+    "Brighton": "Brighton",
+    "Brighton & Hove Albion": "Brighton",
+    "Brighton and Hove Albion": "Brighton",
+    "Brighton & Hove Albion FC": "Brighton",
+
+    # Nottingham Forest
+    "Nott'm Forest": "Nottingham Forest",
+    "Nottingham Forest": "Nottingham Forest",
+    "Nottingham Forest FC": "Nottingham Forest",
+
+    # Newcastle
+    "Newcastle": "Newcastle United",
+    "Newcastle Utd": "Newcastle United",
+    "Newcastle United": "Newcastle United",
+    "Newcastle United FC": "Newcastle United",
+
+    # Others from your sample
+    "Sunderland AFC": "Sunderland",
+    "Brentford FC": "Brentford",
+    "Everton FC": "Everton",
+    "Crystal Palace FC": "Crystal Palace",
+    "Aston Villa FC": "Aston Villa",
+    "Chelsea FC": "Chelsea",
+    "Arsenal FC": "Arsenal",
+    "AFC Bournemouth": "Bournemouth",
+    "Fulham FC": "Fulham",
+    "Burnley FC": "Burnley",
+    "Everton FC": "Everton",
+    "Liverpool FC": "Liverpool",
 }
 
-HOME_ADVANTAGE = 100      # Elo points
+HOME_ADVANTAGE = 80      # Elo points
 BASE_RATING = 1500.0
 K = 40.0                  # higher = more reactive
 
