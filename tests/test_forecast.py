@@ -62,3 +62,19 @@ def test_forecast_marks_sources(model):
     tv = team_view(fc)
     assert len(tv) == 4
     assert tv.loc[(tv.team_id == "e"), "p_win"].iloc[0] == pytest.approx(fc.p_away.iloc[0])
+
+
+def test_forecast_without_any_odds(model):
+    fixtures = pd.DataFrame(
+        {
+            "fixture_id": [1],
+            "gw": [8],
+            "kickoff_utc": ["2026-10-24T14:00:00Z"],
+            "home_id": ["a"],
+            "away_id": ["e"],
+        }
+    )
+    for market in (None, pd.DataFrame()):
+        fc = forecast(model, fixtures, market, BlendConfig())
+        assert list(fc.source) == ["model"]
+        assert fc[["p_home", "p_draw", "p_away"]].sum(axis=1).iloc[0] == pytest.approx(1.0)

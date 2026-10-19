@@ -130,7 +130,7 @@ def model_probs(model: DixonColes, games: pd.DataFrame, promoted=frozenset()) ->
 def forecast(
     model: DixonColes,
     fixtures: pd.DataFrame,
-    market: pd.DataFrame,
+    market: pd.DataFrame | None,
     config: BlendConfig,
     promoted=frozenset(),
 ) -> pd.DataFrame:
@@ -139,6 +139,8 @@ def forecast(
     `market` is the bookmaker consensus (home_id, away_id, p_home, p_draw, p_away, n_books).
     Adds p_home/p_draw/p_away, p_model_* columns and `source` ("blend" or "model").
     """
+    if market is None or market.empty:
+        market = pd.DataFrame(columns=["home_id", "away_id", *PROB_COLS, "n_books"])
     mk = market.rename(columns=dict(zip(PROB_COLS, MARKET_COLS, strict=True)))
     df = fixtures.merge(
         mk[["home_id", "away_id", *MARKET_COLS, "n_books"]], on=["home_id", "away_id"], how="left"
@@ -170,7 +172,7 @@ def upcoming(conn, settings) -> tuple[pd.DataFrame, DixonColes]:
     promoted = promoted_teams(matches, settings.season, pl_teams)
     model = DixonColes(FitConfig(settings.time_decay_half_life_days, settings.ridge)).fit(matches)
     odds = data.latest_odds(conn)
-    market = consensus(odds) if len(odds) else pd.DataFrame(columns=["home_id", "away_id"])
+    market = consensus(odds) if len(odds) else None
     cfg = BlendConfig(settings.market_weight, settings.adjust_ridge)
     return forecast(model, fixtures, market, cfg, promoted), model
 
