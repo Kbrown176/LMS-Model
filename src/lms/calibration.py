@@ -26,7 +26,10 @@ def walk_forward_weeks(dates: pd.Series) -> pd.Series:
 def walk_forward(matches: pd.DataFrame, test_seasons: list[str], config: FitConfig) -> pd.DataFrame:
     """Out-of-sample model predictions for every PL match in `test_seasons`."""
     matches = matches.assign(date=pd.to_datetime(matches["date"]))
-    test = matches[(matches.division == "E0") & matches.season.isin(test_seasons)]
+    # Only matches with closing odds, so model and market are scored on the same games.
+    test = matches[
+        (matches.division == "E0") & matches.season.isin(test_seasons) & matches.odds_home.notna()
+    ]
     weeks = walk_forward_weeks(test.date)
 
     # Which clubs are newly promoted is known before a season starts, so this isn't leakage.
