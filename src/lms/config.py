@@ -14,6 +14,7 @@ CONFIG_DIR = ROOT / "config"
 DATA_DIR = ROOT / "data"
 CACHE_DIR = DATA_DIR / "cache"
 DB_PATH = DATA_DIR / "lms.db"
+REPORTS_DIR = ROOT / "reports"
 SETTINGS_PATH = CONFIG_DIR / "settings.toml"
 DERBIES_PATH = CONFIG_DIR / "derbies.csv"
 
@@ -30,6 +31,7 @@ class Settings:
     min_win_prob: float
     avoid_derbies: bool
     time_decay_half_life_days: float
+    ridge: float
 
 
 def load_settings(path: Path = SETTINGS_PATH) -> Settings:
@@ -44,6 +46,7 @@ def load_settings(path: Path = SETTINGS_PATH) -> Settings:
         min_win_prob=raw["strategy"]["min_win_prob"],
         avoid_derbies=raw["strategy"]["avoid_derbies"],
         time_decay_half_life_days=raw["model"]["time_decay_half_life_days"],
+        ridge=raw["model"]["ridge"],
     )
 
 

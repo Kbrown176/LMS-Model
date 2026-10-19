@@ -15,4 +15,5 @@ min_win_prob = 0.0        # optional floor for any pick in the path
 avoid_derbies = true      # skip picks in fixtures listed in config/derbies.csv
 
 [model]
-time_decay_half_life_days = 180   # older matches count for less (tuned in backtest)
+time_decay_half_life_days = 270   # older matches count for less (tuned: `lms calibrate --tune`)
+ridge = 1.0                       # pulls teams with little data towards average
