@@ -25,14 +25,18 @@ def _now() -> str:
 
 
 def refresh_history(
-    conn: sqlite3.Connection, settings: Settings, summary: RefreshSummary, force: bool
+    conn: sqlite3.Connection,
+    settings: Settings,
+    summary: RefreshSummary,
+    force: bool,
+    max_age_hours: float = 12,
 ) -> None:
     seasons = footballdata.season_codes(settings.season, settings.history_seasons)
     total = 0
     for season in seasons:
         is_current = season == settings.season
-        # Past seasons are immutable: cache forever. Current season: refetch after 12h.
-        max_age = 0 if force else (12 if is_current else None)
+        # Past seasons are immutable: cache forever. Current season: refetch when stale.
+        max_age = 0 if force else (max_age_hours if is_current else None)
         for division in settings.divisions:
             path = footballdata.download(season, division, CACHE_DIR, max_age)
             total += store.upsert(
@@ -78,10 +82,16 @@ def refresh_odds(conn: sqlite3.Connection, summary: RefreshSummary) -> None:
     )
 
 
-def run(settings: Settings, *, force: bool = False, with_odds: bool = True) -> RefreshSummary:
+def run(
+    settings: Settings,
+    *,
+    force: bool = False,
+    with_odds: bool = True,
+    max_age_hours: float = 12,
+) -> RefreshSummary:
     summary = RefreshSummary()
     with store.connect() as conn:
-        refresh_history(conn, settings, summary, force)
+        refresh_history(conn, settings, summary, force, max_age_hours)
         refresh_fpl(conn, settings, summary)
         if with_odds:
             refresh_odds(conn, summary)

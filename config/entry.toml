@@ -1,0 +1,6 @@
+# Your Last Man Standing entry. Update this after each gameweek's pick:
+# add the team you picked to `used`, and drop `lives` if it didn't win.
+# Any spelling of a club name works ("Man Utd", "Spurs", "Nott'm Forest", ...).
+
+lives = 2
+used = []

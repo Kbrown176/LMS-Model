@@ -17,6 +17,8 @@ DB_PATH = DATA_DIR / "lms.db"
 REPORTS_DIR = ROOT / "reports"
 SETTINGS_PATH = CONFIG_DIR / "settings.toml"
 DERBIES_PATH = CONFIG_DIR / "derbies.csv"
+ENTRY_PATH = CONFIG_DIR / "entry.toml"
+PICKS_PATH = ROOT / "PICKS.md"
 
 load_dotenv(ROOT / ".env")
 

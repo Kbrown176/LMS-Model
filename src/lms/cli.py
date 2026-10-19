@@ -12,21 +12,21 @@ app = typer.Typer(help="Premier League Last Man Standing pick optimiser.", no_ar
 console = Console()
 
 
-def _not_ready(phase: str) -> None:
-    console.print(f"[yellow]Not implemented yet ({phase}).[/yellow]")
-    raise typer.Exit(code=1)
-
-
 @app.command()
 def refresh(
     force: bool = typer.Option(False, help="Re-download every results file, ignoring the cache."),
     odds: bool = typer.Option(True, help="Fetch bookmaker odds (uses 1 Odds API request)."),
+    max_age_hours: float = typer.Option(
+        12, help="Refetch the current season's results file if older than this."
+    ),
 ) -> None:
     """Fetch fixtures, results and odds into the local database."""
     from lms import refresh as refresh_mod
 
     with console.status("Refreshing data..."):
-        summary = refresh_mod.run(load_settings(), force=force, with_odds=odds)
+        summary = refresh_mod.run(
+            load_settings(), force=force, with_odds=odds, max_age_hours=max_age_hours
+        )
     for line in summary.lines:
         console.print(f"[green]✓[/green] {line}")
     for warning in summary.warnings:
@@ -236,50 +236,34 @@ def probs(
 @app.command()
 def pick(
     gw: int | None = typer.Option(None, help="Gameweek to pick for (default: next)."),
-    used: str = typer.Option("", help="Teams already used, comma separated (any spelling)."),
-    lives: int | None = typer.Option(None, help="Lives remaining (default from settings)."),
+    used: str | None = typer.Option(
+        None, help="Teams already used, comma separated (default: config/entry.toml)."
+    ),
+    lives: int | None = typer.Option(None, help="Lives left (default: config/entry.toml)."),
     horizon: int | None = typer.Option(None, help="Gameweeks to plan ahead (default: settings)."),
     top: int = typer.Option(8, help="How many of this week's options to list."),
 ) -> None:
     """Recommend this gameweek's pick and the best path ahead."""
     from rich.table import Table
 
-    from lms import store
-    from lms.config import DERBIES_PATH
-    from lms.forecast import team_view, upcoming
-    from lms.strategy import build_board, load_derbies, recommend
-    from lms.teams import TEAMS, UnknownTeamError, team_id, team_name
+    from lms import picks, store
+    from lms.teams import TEAMS, UnknownTeamError, team_name
 
     s = load_settings()
-    lives = lives or s.lives
     try:
-        used_ids = {team_id(t, "--used") for t in used.split(",") if t.strip()}
+        entry = picks.load_entry(s)
+        used_ids = picks.parse_used(used) if used is not None else entry.used
     except UnknownTeamError as e:
         console.print(f"[red]{e}[/red]")
         raise typer.Exit(code=2) from e
+    lives = lives or entry.lives
     if not DB_PATH.exists():
         console.print("[yellow]No database yet. Run `lms refresh` first.[/yellow]")
         raise typer.Exit(code=1)
 
-    with console.status("Fitting model and planning..."):
-        with store.connect() as conn:
-            fc, _ = upcoming(conn, s)
-            nxt = conn.execute(
-                "SELECT gw, deadline_utc FROM gameweeks WHERE season = ? AND is_next", (s.season,)
-            ).fetchone()
-        start = gw or (nxt[0] if nxt else int(fc.gw.min()))
-        board = build_board(
-            team_view(fc[fc.gw.notna()]),
-            start,
-            horizon or s.horizon,
-            used=used_ids,
-            derbies=load_derbies(DERBIES_PATH),
-            avoid_derbies=s.avoid_derbies,
-            derby_min_intensity=s.derby_min_intensity,
-            derby_penalty=s.derby_penalty,
-            min_win_prob=s.min_win_prob,
-        )
-        rec = recommend(board, lives)
+    with console.status("Fitting model and planning..."), store.connect() as conn:
+        ctx = picks.plan(conn, s, used_ids, lives, gw, horizon)
+    rec, start = ctx.rec, ctx.gw
 
     def vs(opp, home, derby):
         tag = f"{team_name(opp)} ({'H' if home else 'A'})"
@@ -287,7 +271,7 @@ def pick(
 
     weeks = len(rec.path)
     deadline = (
-        f"  ·  deadline {nxt[1][:16].replace('T', ' ')} UTC" if nxt and start == nxt[0] else ""
+        f"  ·  deadline {ctx.deadline_utc[:16].replace('T', ' ')} UTC" if ctx.deadline_utc else ""
     )
     console.print(
         f"\n[bold]GW{start} pick[/bold]  ·  {lives} li{'fe' if lives == 1 else 'ves'}  ·  "
@@ -374,9 +358,36 @@ def backtest(
 
 
 @app.command()
-def report() -> None:
-    """Write PICKS.md for the upcoming gameweek."""
-    _not_ready("Phase 7")
+def report(
+    top: int = typer.Option(10, help="How many of this week's options to list."),
+) -> None:
+    """Write PICKS.md for your entry (config/entry.toml) for the upcoming gameweek."""
+    from lms import picks, store
+    from lms import report as report_mod
+    from lms.config import PICKS_PATH
+
+    s = load_settings()
+    entry = picks.load_entry(s)
+    if not DB_PATH.exists():
+        console.print("[yellow]No database yet. Run `lms refresh` first.[/yellow]")
+        raise typer.Exit(code=1)
+    with console.status("Fitting model and planning..."), store.connect() as conn:
+        ctx = picks.plan(conn, s, entry.used, entry.lives)
+        meta = {
+            "last_refresh_utc": store.get_meta(conn, "last_refresh_utc"),
+            "odds_requests_remaining": store.get_meta(conn, "odds_requests_remaining"),
+            "results_through": conn.execute(
+                "SELECT MAX(d) FROM (SELECT MAX(date) AS d FROM results UNION ALL "
+                "SELECT MAX(substr(kickoff_utc, 1, 10)) FROM fixtures WHERE finished)"
+            ).fetchone()[0],
+            "odds_matches": str((ctx.forecast.source == "blend").sum()),
+        }
+    PICKS_PATH.write_text(report_mod.render(ctx, s.season, meta, top))
+    best = ctx.rec.options.iloc[0]
+    console.print(
+        f"[green]✓[/green] Wrote {PICKS_PATH.name}: GW{ctx.gw} pick "
+        f"{report_mod.team_name(best.team_id)} ({best.p_win * 100:.0f}% to win)"
+    )
 
 
 @app.command()
