@@ -44,7 +44,9 @@ def parse_fixtures(bootstrap: dict, fixtures: list[dict], season: str) -> pd.Dat
             "kickoff_utc": f["kickoff_time"],
             "home_id": fpl_to_id[f["team_h"]],
             "away_id": fpl_to_id[f["team_a"]],
-            "finished": bool(f["finished"]),
+            # `finished` waits for bonus points to be confirmed after the whole gameweek;
+            # `finished_provisional` is set at full time, which is what matters here.
+            "finished": bool(f["finished"] or f.get("finished_provisional")),
             "home_score": f["team_h_score"],
             "away_score": f["team_a_score"],
         }

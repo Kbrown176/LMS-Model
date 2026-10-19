@@ -17,3 +17,8 @@ avoid_derbies = true      # skip picks in fixtures listed in config/derbies.csv
 [model]
 time_decay_half_life_days = 270   # older matches count for less (tuned: `lms calibrate --tune`)
 ridge = 1.0                       # pulls teams with little data towards average
+
+[blend]
+market_weight = 0.5   # weight on bookmaker odds where they exist. Tuning is flat from 0 to 0.5
+                      # once ratings are market-adjusted; 0.5 keeps this week's odds in directly.
+adjust_ridge = 0.03   # how freely odds may nudge team ratings for later weeks (tuned)

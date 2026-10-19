@@ -106,6 +106,7 @@ def ratings() -> None:
 @app.command()
 def calibrate(
     tune: bool = typer.Option(False, help="Also grid-search half-life and ridge (~2 min)."),
+    blend: bool = typer.Option(False, help="Also tune the market blend (~30 s)."),
 ) -> None:
     """Walk-forward test of the model against closing odds; writes reports/calibration.md."""
     from lms import calibration
@@ -121,11 +122,115 @@ def calibrate(
         console.print(tuning.head(5).to_string(index=False))
     with console.status("Running walk-forward calibration..."):
         md = calibration.report_markdown(matches, seasons, _fit_config(s), tuning)
+    if blend:
+        from lms.forecast import evaluate
+
+        with console.status("Tuning market blend (walk-forward)..."):
+            near, far = evaluate(
+                matches,
+                seasons[:-1],
+                _fit_config(s),
+                weights=(0.0, 0.3, 0.5, 0.7, 1.0),
+                ridges=(float("inf"), 0.3, 0.1, 0.03, 0.01),
+            )
+        md += "\n".join(
+            [
+                "",
+                "## Market blend",
+                "",
+                "Walk-forward on the tuning seasons. Each week the closing odds of the next two "
+                "weeks stand in for the odds you'd see; team ratings are nudged towards them "
+                "(`adjust_ridge`, inf = no nudge), then blended with this week's odds "
+                "(`market_weight`, 0 = model only, 1 = market only).",
+                "",
+                "### This week (odds available)",
+                "",
+                calibration._md_table(near.head(8), ".4f"),
+                "",
+                "### 2-9 weeks ahead (no odds yet)",
+                "",
+                calibration._md_table(far, ".4f"),
+                "",
+            ]
+        )
     REPORTS_DIR.mkdir(exist_ok=True)
     path = REPORTS_DIR / "calibration.md"
     path.write_text(md)
     console.print(md)
     console.print(f"[green]✓[/green] Wrote {path.relative_to(REPORTS_DIR.parent)}")
+
+
+@app.command()
+def probs(
+    gw: int | None = typer.Option(None, help="Gameweek to list (default: next)."),
+    grid: bool = typer.Option(False, help="Team x gameweek win-probability grid instead."),
+    weeks: int | None = typer.Option(None, help="Gameweeks in the grid (default: horizon)."),
+    csv: str | None = typer.Option(None, help="Also write every remaining fixture to this CSV."),
+) -> None:
+    """Win probabilities for upcoming fixtures (model blended with bookmaker odds)."""
+    from rich.table import Table
+
+    from lms import store
+    from lms.forecast import team_view, upcoming
+    from lms.teams import TEAMS, team_name
+
+    s = load_settings()
+    if not DB_PATH.exists():
+        console.print("[yellow]No database yet. Run `lms refresh` first.[/yellow]")
+        raise typer.Exit(code=1)
+    with store.connect() as conn:
+        fc, _ = upcoming(conn, s)
+        next_gw = conn.execute(
+            "SELECT gw FROM gameweeks WHERE season = ? AND is_next", (s.season,)
+        ).fetchone()
+    fc = fc[fc.gw.notna()].astype({"gw": int})
+    start = gw or (next_gw[0] if next_gw else int(fc.gw.min()))
+
+    if csv:
+        fc.to_csv(csv, index=False)
+        console.print(f"[green]✓[/green] Wrote {len(fc)} fixtures to {csv}")
+
+    if grid:
+        tv = team_view(fc).drop_duplicates(["gw", "team_id"])  # first fixture in a double GW
+        gws = list(range(start, start + (weeks or s.horizon)))
+        tv = tv[tv.gw.isin(gws)]
+        table = Table(title=f"Win probability (%) GW{gws[0]}-{gws[-1]}  ·  * = includes odds")
+        table.add_column("Team")
+        for g in gws:
+            table.add_column(f"GW{g}", justify="right")
+        order = tv.groupby("team_id").p_win.mean().sort_values(ascending=False).index
+        for t in order:
+            cells = []
+            for g in gws:
+                row = tv[(tv.team_id == t) & (tv.gw == g)]
+                if row.empty:
+                    cells.append("[dim]-[/dim]")
+                    continue
+                r = row.iloc[0]
+                opp = TEAMS[r.opponent_id].short + ("" if r.is_home else "(a)")
+                mark = "*" if r.source == "blend" else ""
+                colour = "green" if r.p_win >= 0.6 else "yellow" if r.p_win >= 0.45 else "dim"
+                cells.append(f"[{colour}]{r.p_win * 100:.0f}{mark}[/{colour}] {opp}")
+            table.add_row(team_name(t), *cells)
+        console.print(table)
+        return
+
+    games = fc[fc.gw == start]
+    table = Table(title=f"GW{start} probabilities")
+    for col in ("Kick-off (UTC)", "Home", "Away", "Home %", "Draw %", "Away %", "Source"):
+        table.add_column(col, justify="right" if "%" in col else "left")
+    for r in games.itertuples():
+        src = f"blend ({int(r.n_books)} books)" if r.source == "blend" else "model"
+        table.add_row(
+            r.kickoff_utc[:16].replace("T", " "),
+            team_name(r.home_id),
+            team_name(r.away_id),
+            f"{r.p_home * 100:.0f}",
+            f"{r.p_draw * 100:.0f}",
+            f"{r.p_away * 100:.0f}",
+            src,
+        )
+    console.print(table)
 
 
 @app.command()

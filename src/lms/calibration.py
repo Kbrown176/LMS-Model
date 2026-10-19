@@ -18,11 +18,16 @@ from lms.model import DixonColes, FitConfig, promoted_teams
 OUTCOMES = ("H", "D", "A")
 
 
+def walk_forward_weeks(dates: pd.Series) -> pd.Series:
+    """Tuesday-to-Monday blocks: one block spans a normal weekend gameweek."""
+    return dates.dt.to_period("W-MON").dt.start_time
+
+
 def walk_forward(matches: pd.DataFrame, test_seasons: list[str], config: FitConfig) -> pd.DataFrame:
     """Out-of-sample model predictions for every PL match in `test_seasons`."""
     matches = matches.assign(date=pd.to_datetime(matches["date"]))
     test = matches[(matches.division == "E0") & matches.season.isin(test_seasons)]
-    weeks = test.date.dt.to_period("W-MON").dt.start_time  # Tue-Mon blocks span a gameweek
+    weeks = walk_forward_weeks(test.date)
 
     # Which clubs are newly promoted is known before a season starts, so this isn't leakage.
     promoted = {s: promoted_teams(matches, s) for s in test_seasons}
@@ -211,8 +216,9 @@ def report_markdown(
         "",
         _md_table(promoted_bias(preds, matches)),
         "",
-        f"Learned promotion adjustment: attack -{final.promoted_attack:.3f}, "
-        f"defence -{final.promoted_defence:.3f} (log goals). Dixon-Coles rho {final.rho:.3f}.",
+        f"Learned promotion adjustment (log goals, applied to promoted clubs): "
+        f"attack {-final.promoted_attack:+.3f}, defence {-final.promoted_defence:+.3f}. "
+        f"Dixon-Coles rho {final.rho:.3f}.",
     ]
     if tuning is not None:
         parts += ["", "## Tuning grid", "", _md_table(tuning.head(10), ".4f")]

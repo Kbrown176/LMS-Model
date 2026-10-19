@@ -32,6 +32,8 @@ class Settings:
     avoid_derbies: bool
     time_decay_half_life_days: float
     ridge: float
+    market_weight: float
+    adjust_ridge: float
 
 
 def load_settings(path: Path = SETTINGS_PATH) -> Settings:
@@ -47,6 +49,8 @@ def load_settings(path: Path = SETTINGS_PATH) -> Settings:
         avoid_derbies=raw["strategy"]["avoid_derbies"],
         time_decay_half_life_days=raw["model"]["time_decay_half_life_days"],
         ridge=raw["model"]["ridge"],
+        market_weight=raw["blend"]["market_weight"],
+        adjust_ridge=raw["blend"]["adjust_ridge"],
     )
 
 

@@ -128,3 +128,10 @@ def test_upsert_updates_changed_rows(tmp_path):
         store.upsert(conn, "fixtures", played)
         unfinished = conn.execute("SELECT COUNT(*) FROM fixtures WHERE finished = 0").fetchone()
     assert unfinished[0] == 0
+
+
+def test_fpl_provisional_result_counts_as_finished():
+    fixtures = _json("fpl_fixtures.json")
+    fixtures[2] = {**fixtures[2], "finished": False, "finished_provisional": True}
+    df = fpl.parse_fixtures(_json("fpl_bootstrap.json"), fixtures, "2627")
+    assert df.loc[2, "finished"]
