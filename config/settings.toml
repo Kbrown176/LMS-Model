@@ -12,7 +12,11 @@ lives = 2                 # default lives; override with --lives
 [strategy]
 horizon = 10              # gameweeks to plan ahead
 min_win_prob = 0.0        # optional floor for any pick in the path
-avoid_derbies = true      # skip picks in fixtures listed in config/derbies.csv
+# Derbies (config/derbies.csv) are always flagged. 5 seasons of PL data show no reliable
+# derby upset effect beyond what the odds already price, so neither option is on by default.
+avoid_derbies = false     # never pick a team in a derby at least this intense:
+derby_min_intensity = 0.8
+derby_penalty = 0.0       # soft option: win prob x (1 - penalty x intensity)
 
 [model]
 time_decay_half_life_days = 270   # older matches count for less (tuned: `lms calibrate --tune`)

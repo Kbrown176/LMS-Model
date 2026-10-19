@@ -236,11 +236,104 @@ def probs(
 @app.command()
 def pick(
     gw: int | None = typer.Option(None, help="Gameweek to pick for (default: next)."),
-    used: str = typer.Option("", help="Comma-separated teams already used."),
+    used: str = typer.Option("", help="Teams already used, comma separated (any spelling)."),
     lives: int | None = typer.Option(None, help="Lives remaining (default from settings)."),
+    horizon: int | None = typer.Option(None, help="Gameweeks to plan ahead (default: settings)."),
+    top: int = typer.Option(8, help="How many of this week's options to list."),
 ) -> None:
     """Recommend this gameweek's pick and the best path ahead."""
-    _not_ready("Phase 5")
+    from rich.table import Table
+
+    from lms import store
+    from lms.config import DERBIES_PATH
+    from lms.forecast import team_view, upcoming
+    from lms.strategy import build_board, load_derbies, recommend
+    from lms.teams import TEAMS, UnknownTeamError, team_id, team_name
+
+    s = load_settings()
+    lives = lives or s.lives
+    try:
+        used_ids = {team_id(t, "--used") for t in used.split(",") if t.strip()}
+    except UnknownTeamError as e:
+        console.print(f"[red]{e}[/red]")
+        raise typer.Exit(code=2) from e
+    if not DB_PATH.exists():
+        console.print("[yellow]No database yet. Run `lms refresh` first.[/yellow]")
+        raise typer.Exit(code=1)
+
+    with console.status("Fitting model and planning..."):
+        with store.connect() as conn:
+            fc, _ = upcoming(conn, s)
+            nxt = conn.execute(
+                "SELECT gw, deadline_utc FROM gameweeks WHERE season = ? AND is_next", (s.season,)
+            ).fetchone()
+        start = gw or (nxt[0] if nxt else int(fc.gw.min()))
+        board = build_board(
+            team_view(fc[fc.gw.notna()]),
+            start,
+            horizon or s.horizon,
+            used=used_ids,
+            derbies=load_derbies(DERBIES_PATH),
+            avoid_derbies=s.avoid_derbies,
+            derby_min_intensity=s.derby_min_intensity,
+            derby_penalty=s.derby_penalty,
+            min_win_prob=s.min_win_prob,
+        )
+        rec = recommend(board, lives)
+
+    def vs(opp, home, derby):
+        tag = f"{team_name(opp)} ({'H' if home else 'A'})"
+        return tag + (" [red]derby[/red]" if derby > 0 else "")
+
+    weeks = len(rec.path)
+    deadline = (
+        f"  ·  deadline {nxt[1][:16].replace('T', ' ')} UTC" if nxt and start == nxt[0] else ""
+    )
+    console.print(
+        f"\n[bold]GW{start} pick[/bold]  ·  {lives} li{'fe' if lives == 1 else 'ves'}  ·  "
+        f"planning {weeks} weeks{deadline}"
+    )
+    if used_ids:
+        console.print("Used: " + ", ".join(sorted(TEAMS[t].name for t in used_ids)))
+
+    table = Table(title=f"This week's options, ranked by {weeks}-week survival")
+    for col in (
+        "#",
+        "Team",
+        "Opponent",
+        "Win %",
+        f"Alive after GW{rec.path.gw.iloc[-1]}",
+        "vs best",
+    ):
+        table.add_column(col, justify="left" if col in ("Team", "Opponent") else "right")
+    for k, r in rec.options.head(top).iterrows():
+        table.add_row(
+            str(k + 1),
+            team_name(r.team_id),
+            vs(r.opponent_id, r.is_home, r.derby),
+            f"{r.p_win * 100:.0f}",
+            f"{r.plan_survival * 100:.1f}%",
+            "" if k == 0 else f"{r.vs_best * 100:+.1f}",
+        )
+    console.print(table)
+
+    path = Table(title=f"Recommended path (starting with {team_name(rec.path.team_id.iloc[0])})")
+    for col in ("GW", "Team", "Opponent", "Win %", "Still alive", "Odds?"):
+        path.add_column(col, justify="left" if col in ("Team", "Opponent") else "right")
+    for r in rec.path.itertuples():
+        path.add_row(
+            str(r.gw),
+            team_name(r.team_id),
+            vs(r.opponent_id, r.is_home, r.derby),
+            f"{r.p_win * 100:.0f}",
+            f"{r.alive * 100:.1f}%",
+            "yes" if r.source == "blend" else "",
+        )
+    console.print(path)
+    console.print(
+        "[dim]Win % = probability the team wins (a draw costs a life). Later weeks are "
+        "re-planned every gameweek as results and odds come in.[/dim]"
+    )
 
 
 @app.command()

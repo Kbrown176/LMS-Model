@@ -30,6 +30,8 @@ class Settings:
     horizon: int
     min_win_prob: float
     avoid_derbies: bool
+    derby_min_intensity: float
+    derby_penalty: float
     time_decay_half_life_days: float
     ridge: float
     market_weight: float
@@ -47,6 +49,8 @@ def load_settings(path: Path = SETTINGS_PATH) -> Settings:
         horizon=raw["strategy"]["horizon"],
         min_win_prob=raw["strategy"]["min_win_prob"],
         avoid_derbies=raw["strategy"]["avoid_derbies"],
+        derby_min_intensity=raw["strategy"]["derby_min_intensity"],
+        derby_penalty=raw["strategy"]["derby_penalty"],
         time_decay_half_life_days=raw["model"]["time_decay_half_life_days"],
         ridge=raw["model"]["ridge"],
         market_weight=raw["blend"]["market_weight"],
