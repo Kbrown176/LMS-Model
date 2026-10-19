@@ -1,6 +1,6 @@
 # LMS picks · GW8 · 2026/27
 
-> Generated 2026-10-19 19:31 UTC · **deadline Fri 23 Oct 17:30 UTC** · 2 lives · used: none yet
+> Generated 2026-10-19 19:33 UTC · **deadline Fri 23 Oct 17:30 UTC** · 2 lives · used: none yet
 
 ## Pick: Brentford vs Hull City (A)
 
@@ -67,6 +67,6 @@ Win % and opponent (CAPS = home, lower case = away). **Bold** = 60%+. Used teams
 
 ## Data
 
-- Results up to 2026-10-14; refreshed 2026-10-19T19:17:40+00:00
+- Results up to 2026-10-18; refreshed 2026-10-19T19:33:55+00:00
 - Bookmaker odds for 20 upcoming matches (Odds API requests left this month: 497)
 - Update `config/entry.toml` with each pick and any lost life.
