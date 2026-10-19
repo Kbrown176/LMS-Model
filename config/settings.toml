@@ -1,0 +1,18 @@
+# LMS model settings. Team-specific data never goes here, only rules and tuning knobs.
+
+[season]
+current = "2627"          # football-data.co.uk season code (2026/27)
+history_seasons = 5       # past seasons used for model training
+divisions = ["E0", "E1"]  # Premier League + Championship (rates promoted clubs)
+
+[rules]
+lives = 2                 # default lives; override with --lives
+# Draw = out, no team reuse. These are fixed by the competition format.
+
+[strategy]
+horizon = 10              # gameweeks to plan ahead
+min_win_prob = 0.0        # optional floor for any pick in the path
+avoid_derbies = true      # skip picks in fixtures listed in config/derbies.csv
+
+[model]
+time_decay_half_life_days = 180   # older matches count for less (tuned in backtest)

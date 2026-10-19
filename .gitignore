@@ -1,9 +1,18 @@
+# Secrets
 .env
-data/epl_current_odds.csv
-data/Fixtures.csv
-data/Results.csv
-data/Table.csv
-data/*.csv
 
+# Generated data (rebuilt by `lms refresh`)
+data/
+
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+.venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+
+# OS / editor
+.DS_Store

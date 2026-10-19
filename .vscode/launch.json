@@ -1,0 +1,36 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "lms refresh",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "lms",
+      "args": ["refresh"],
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "name": "lms pick",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "lms",
+      "args": ["pick", "--used", "${input:usedTeams}"],
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "name": "lms backtest",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "lms",
+      "args": ["backtest"]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "usedTeams",
+      "type": "promptString",
+      "description": "Teams already used (comma separated)",
+      "default": ""
+    }
+  ]
+}
