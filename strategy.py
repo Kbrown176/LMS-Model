@@ -13,8 +13,6 @@ importlib.reload(strategy)
 TOP_SIDES = {
     "Manchester City",
     "Arsenal",
-    "Liverpool",
-    "Manchester United",
     "Chelsea",
 
     
@@ -23,6 +21,7 @@ TOP_SIDES = {
 # Rough variance tags – tweak as you like
 HIGH_VARIANCE_TEAMS = {
     "Brighton",
+    "Manchester United",
     "Tottenham",
     "Brentford",
     "Newcastle United",
@@ -30,8 +29,6 @@ HIGH_VARIANCE_TEAMS = {
 
 MEDIUM_VARIANCE_TEAMS = {
 
-    "Manchester United",
-    "Aston Villa",
     "Crystal Palace",
     "Wolverhampton Wanderers",
     "Bournemouth",
