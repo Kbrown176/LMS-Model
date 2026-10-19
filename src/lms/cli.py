@@ -337,9 +337,40 @@ def pick(
 
 
 @app.command()
-def backtest() -> None:
-    """Replay past seasons to evaluate the strategy."""
-    _not_ready("Phase 6")
+def backtest(
+    seasons: str = typer.Option("2223,2324,2425,2526", help="Season codes to replay."),
+    horizons: str = typer.Option("1,3,5,8,10,12,15", help="Planning horizons to compare."),
+) -> None:
+    """Replay past seasons as LMS competitions; writes reports/backtest.md (~1 min)."""
+    from lms import backtest as bt
+    from lms.config import REPORTS_DIR
+    from lms.forecast import BlendConfig
+
+    s, matches, _ = _load_matches()
+    hs = [int(h) for h in horizons.split(",")]
+    data = []
+    for season in seasons.split(","):
+        with console.status(f"Rebuilding {season} week by week..."):
+            data.append(
+                bt.prepare_season(
+                    matches,
+                    season.strip(),
+                    _fit_config(s),
+                    BlendConfig(s.market_weight, s.adjust_ridge),
+                    max(hs),
+                )
+            )
+    strategies = {"random": bt.random_pick, "biggest favourite": bt.biggest_favourite} | {
+        f"optimiser H={h}": bt.optimiser(h) for h in hs
+    }
+    with console.status("Playing competitions..."):
+        results = bt.run(data, strategies)
+    md = bt.report_markdown(results, s.horizon if s.horizon in hs else hs[-1])
+    REPORTS_DIR.mkdir(exist_ok=True)
+    path = REPORTS_DIR / "backtest.md"
+    path.write_text(md)
+    console.print(md)
+    console.print(f"[green]✓[/green] Wrote {path.relative_to(REPORTS_DIR.parent)}")
 
 
 @app.command()
