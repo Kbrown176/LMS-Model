@@ -1,0 +1,172 @@
+[
+ {
+  "id": "9baaf4e48b041cfef04e70e42532502e",
+  "sport_key": "soccer_epl",
+  "sport_title": "EPL",
+  "commence_time": "2026-10-19T19:00:00Z",
+  "home_team": "Tottenham Hotspur",
+  "away_team": "Coventry City",
+  "bookmakers": [
+   {
+    "key": "leovegas",
+    "title": "LeoVegas",
+    "last_update": "2026-10-19T19:02:09Z",
+    "markets": [
+     {
+      "key": "h2h",
+      "last_update": "2026-10-19T19:02:08Z",
+      "outcomes": [
+       {
+        "name": "Coventry City",
+        "price": 4.9
+       },
+       {
+        "name": "Tottenham Hotspur",
+        "price": 1.47
+       },
+       {
+        "name": "Draw",
+        "price": 4.1
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "key": "betfred_uk",
+    "title": "Betfred (UK)",
+    "last_update": "2026-10-19T18:59:11Z",
+    "markets": [
+     {
+      "key": "h2h",
+      "last_update": "2026-10-19T18:59:10Z",
+      "outcomes": [
+       {
+        "name": "Coventry City",
+        "price": 5.5
+       },
+       {
+        "name": "Tottenham Hotspur",
+        "price": 1.53
+       },
+       {
+        "name": "Draw",
+        "price": 4.5
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "key": "skybet",
+    "title": "Sky Bet",
+    "last_update": "2026-10-19T19:00:56Z",
+    "markets": [
+     {
+      "key": "h2h",
+      "last_update": "2026-10-19T19:00:56Z",
+      "outcomes": [
+       {
+        "name": "Coventry City",
+        "price": 5.5
+       },
+       {
+        "name": "Tottenham Hotspur",
+        "price": 1.5
+       },
+       {
+        "name": "Draw",
+        "price": 4.5
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "d0202960708a442401d7fc7bd74a0183",
+  "sport_key": "soccer_epl",
+  "sport_title": "EPL",
+  "commence_time": "2026-10-23T19:00:00Z",
+  "home_team": "Ipswich Town",
+  "away_team": "Nottingham Forest",
+  "bookmakers": [
+   {
+    "key": "betfred_uk",
+    "title": "Betfred (UK)",
+    "last_update": "2026-10-19T19:01:46Z",
+    "markets": [
+     {
+      "key": "h2h",
+      "last_update": "2026-10-19T19:01:46Z",
+      "outcomes": [
+       {
+        "name": "Ipswich Town",
+        "price": 3.0
+       },
+       {
+        "name": "Nottingham Forest",
+        "price": 2.25
+       },
+       {
+        "name": "Draw",
+        "price": 3.6
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "key": "unibet_uk",
+    "title": "Unibet (UK)",
+    "last_update": "2026-10-19T19:02:09Z",
+    "markets": [
+     {
+      "key": "h2h",
+      "last_update": "2026-10-19T19:02:07Z",
+      "outcomes": [
+       {
+        "name": "Ipswich Town",
+        "price": 3.0
+       },
+       {
+        "name": "Nottingham Forest",
+        "price": 2.3
+       },
+       {
+        "name": "Draw",
+        "price": 3.5
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "key": "leovegas",
+    "title": "LeoVegas",
+    "last_update": "2026-10-19T19:02:09Z",
+    "markets": [
+     {
+      "key": "h2h",
+      "last_update": "2026-10-19T19:02:08Z",
+      "outcomes": [
+       {
+        "name": "Ipswich Town",
+        "price": 2.95
+       },
+       {
+        "name": "Nottingham Forest",
+        "price": 2.25
+       },
+       {
+        "name": "Draw",
+        "price": 3.45
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ }
+]

@@ -11,5 +11,6 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
 cp .env.example .env   # add your ODDS_API_KEY
-lms info
+lms refresh   # ~1 min first time, then seconds
+lms status
 ```
