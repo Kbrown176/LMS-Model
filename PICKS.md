@@ -1,25 +1,25 @@
-# LMS picks · GW8 · 2026/27
+# LMS picks · GW9 · 2026/27
 
-> Generated 2026-10-23 11:17 UTC · **deadline Fri 23 Oct 17:30 UTC** · 2 lives · used: none yet
+> Generated 2026-10-27 11:51 UTC · **deadline Sat 31 Oct 11:00 UTC** · 2 lives · used: none yet
 
-## Pick: Brentford vs Hull City (A)
+## Pick: Tottenham Hotspur vs Crystal Palace (H)
 
-**55%** to win this week. Following the plan below, the chance of still being in after GW15 is **16.3%** with 2 lives.
+**61%** to win this week. Following the plan below, the chance of still being in after GW16 is **17.0%** with 2 lives.
 
-## This week's options, ranked by survival to GW15
+## This week's options, ranked by survival to GW16
 
-| # | Team | Opponent | Win | Alive after GW15 | vs best |
+| # | Team | Opponent | Win | Alive after GW16 | vs best |
 | ---: | --- | --- | ---: | ---: | ---: |
-| 1 | Brentford | Hull City (A) | 55% | 16.3% |  |
-| 2 | Chelsea | Tottenham Hotspur (H) | 55% | 14.7% | -1.6 |
-| 3 | Manchester City | Aston Villa (A) | 58% | 14.6% | -1.7 |
-| 4 | Arsenal | Everton (H) | 66% | 14.3% | -2.0 |
-| 5 | Liverpool | Brighton (H) | 45% | 14.2% | -2.1 |
-| 6 | Manchester United | Bournemouth (H) | 45% | 14.2% | -2.1 |
-| 7 | Fulham | Coventry City (A) | 42% | 13.6% | -2.6 |
-| 8 | Nottingham Forest | Ipswich Town (A) | 42% | 13.6% | -2.7 |
-| 9 | Newcastle United | Crystal Palace (A) | 41% | 13.5% | -2.8 |
-| 10 | Leeds United | Sunderland (A) | 39% | 12.2% | -4.1 |
+| 1 | Tottenham Hotspur | Crystal Palace (H) | 61% | 17.0% |  |
+| 2 | Brentford | Nottingham Forest (H) | 47% | 15.0% | -2.0 |
+| 3 | Aston Villa | Fulham (H) | 47% | 14.9% | -2.0 |
+| 4 | Manchester City | Brighton (H) | 57% | 14.6% | -2.3 |
+| 5 | Chelsea | Manchester United (H) | 52% | 14.3% | -2.6 |
+| 6 | Bournemouth | Leeds United (H) | 45% | 14.0% | -3.0 |
+| 7 | Newcastle United | Everton (H) | 42% | 13.9% | -3.1 |
+| 8 | Sunderland | Coventry City (A) | 39% | 13.4% | -3.6 |
+| 9 | Ipswich Town | Hull City (A) | 36% | 12.8% | -4.2 |
+| 10 | Hull City | Ipswich Town (H) | 36% | 12.8% | -4.2 |
 
 Ranked by the best plan that starts with each team, not by this week alone: a team that's much more valuable in a later week can rank below a weaker pick now.
 
@@ -27,46 +27,46 @@ Ranked by the best plan that starts with each team, not by this week alone: a te
 
 | GW | Team | Opponent | Win | Still in | Based on |
 | ---: | --- | --- | ---: | ---: | --- |
-| 8 | Brentford | Hull City (A) | 55% | 100.0% | odds + model |
-| 9 | Tottenham Hotspur | Crystal Palace (H) | 58% | 81.3% | odds + model |
-| 10 | Arsenal | Hull City (H) | 81% | 72.0% | model |
-| 11 | Manchester City | Fulham (H) | 71% | 58.5% | model |
-| 12 | Leeds United | Coventry City (H) | 60% | 42.5% | model |
-| 13 | Chelsea | Crystal Palace (H) | 70% | 33.1% | model |
-| 14 | Manchester United | Coventry City (H) | 67% | 24.8% | model |
-| 15 | Brighton | Everton (H) | 56% | 16.3% | model |
+| 9 | Tottenham Hotspur | Crystal Palace (H) | 61% | 100.0% | odds + model |
+| 10 | Arsenal | Hull City (H) | 79% | 91.8% | odds + model |
+| 11 | Brighton | Hull City (A) | 61% | 74.9% | model |
+| 12 | Leeds United | Coventry City (H) | 56% | 55.2% | model |
+| 13 | Chelsea | Crystal Palace (H) | 65% | 41.8% | model |
+| 14 | Bournemouth | Hull City (H) | 65% | 31.0% | model |
+| 15 | Liverpool | Leeds United (H) | 53% | 19.8% | model |
+| 16 | Manchester City | Hull City (H) | 82% | 17.0% | model |
 
 Only this week's pick is a commitment. The plan is redone every gameweek.
 
-## Win probability grid, GW8–15
+## Win probability grid, GW9–16
 
 Win % and opponent (CAPS = home, lower case = away). **Bold** = 60%+. Used teams are struck through.
 
-| Team | GW8 | GW9 | GW10 | GW11 | GW12 | GW13 | GW14 | GW15 |
+| Team | GW9 | GW10 | GW11 | GW12 | GW13 | GW14 | GW15 | GW16 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Arsenal | **66** EVE | 44 liv | **81** HUL | 59 new | 43 MCI | 52 bre | 54 tot | **62** BOU |
-| Manchester City | 58 avl | 57 BHA | 56 nfo | **71** FUL | 29 ars | **63** LEE | 53 bre | 58 CHE |
-| Chelsea | 55 TOT | 51 MUN | 50 sun | 52 LEE | 45 nfo | **70** CRY | 44 LIV | 21 mci |
-| Liverpool | 45 BHA | 29 ARS | 57 cry | 50 MUN | 45 eve | **61** SUN | 32 che | 52 LEE |
-| Brighton | 31 liv | 21 mci | 52 BRE | **64** hul | **60** NEW | 39 bou | 44 nfo | 56 EVE |
-| Manchester United | 45 BOU | 25 che | 51 AVL | 26 liv | 46 BRE | 41 new | **67** COV | 50 cry |
-| Tottenham Hotspur | 22 che | 58 CRY | 30 lee | **60** IPS | 39 sun | 48 FUL | 20 ARS | 53 hul |
-| Bournemouth | 30 mun | 44 LEE | 51 ips | 48 NFO | 39 ful | 36 BHA | **67** HUL | 15 ars |
-| Aston Villa | 20 MCI | 46 FUL | 25 mun | 47 SUN | 45 ips | 43 EVE | 54 CRY | 47 cov |
-| Brentford | 55 hul | 47 NFO | 24 bha | 48 EVE | 29 mun | 22 ARS | 24 MCI | 39 ful |
-| Leeds United | 39 sun | 29 bou | 42 TOT | 23 che | **60** COV | 15 mci | 58 IPS | 23 liv |
-| Newcastle United | 41 cry | 43 EVE | 33 ful | 18 ARS | 19 bha | 35 MUN | 47 SUN | 44 ips |
-| Nottingham Forest | 42 ips | 27 bre | 19 MCI | 25 bou | 29 CHE | 47 hul | 29 BHA | 35 sun |
-| Fulham | 42 cov | 28 avl | 40 NEW | 11 mci | 33 BOU | 25 tot | 29 eve | 34 BRE |
-| Everton | 12 ars | 31 new | 54 COV | 25 bre | 27 LIV | 29 avl | 41 FUL | 19 bha |
-| Ipswich Town | 31 NFO | 37 hul | 25 BOU | 18 tot | 31 AVL | 34 cov | 18 lee | 32 NEW |
-| Coventry City | 31 FUL | 34 SUN | 20 eve | 39 CRY | 16 lee | 41 IPS | 14 mun | 28 AVL |
-| Sunderland | 30 LEE | 38 cov | 23 CHE | 24 avl | 31 TOT | 15 liv | 25 new | 33 NFO |
-| Crystal Palace | 33 NEW | 19 tot | 20 LIV | 35 cov | 50 HUL | 12 che | 21 avl | 25 MUN |
-| Hull City | 20 BRE | 36 IPS | 5 ars | 15 BHA | 24 cry | 25 NFO | 13 bou | 22 TOT |
+| Manchester City | 57 BHA | 56 nfo | **68** FUL | 30 ars | **64** LEE | 52 bre | **61** CHE | **82** HUL |
+| Arsenal | 41 liv | **79** HUL | 56 new | 41 MCI | 49 bre | 48 tot | **61** BOU | **63** MUN |
+| Brighton | 21 mci | 50 BRE | **61** hul | 58 NEW | 39 bou | 43 nfo | 54 EVE | **70** IPS |
+| Liverpool | 31 ARS | 55 cry | 55 MUN | 44 eve | 57 SUN | 35 che | 53 LEE | 50 TOT |
+| Chelsea | 52 MUN | 44 sun | 50 LEE | 41 nfo | **65** CRY | 40 LIV | 19 mci | 50 AVL |
+| Bournemouth | 45 LEE | 49 ips | 47 NFO | 37 ful | 36 BHA | **65** HUL | 16 ars | **64** COV |
+| Tottenham Hotspur | **61** CRY | 35 lee | **63** IPS | 39 sun | 49 FUL | 25 ARS | 55 hul | 25 liv |
+| Aston Villa | 47 FUL | 32 mun | 47 SUN | 48 ips | 45 EVE | 57 CRY | 50 cov | 26 che |
+| Brentford | 47 NFO | 25 bha | 47 EVE | 34 mun | 24 ARS | 24 MCI | 37 ful | 50 NEW |
+| Manchester United | 25 che | 42 AVL | 22 liv | 41 BRE | 36 new | **62** COV | 45 cry | 14 ars |
+| Leeds United | 27 bou | 36 TOT | 24 che | 56 COV | 14 mci | 55 IPS | 21 liv | 42 FUL |
+| Newcastle United | 42 EVE | 32 ful | 19 ARS | 20 bha | 40 MUN | 44 SUN | 44 ips | 26 bre |
+| Everton | 31 new | 55 COV | 25 bre | 28 LIV | 27 avl | 40 FUL | 20 bha | 29 nfo |
+| Nottingham Forest | 27 bre | 20 MCI | 26 bou | 32 CHE | 47 hul | 30 BHA | 32 sun | 40 EVE |
+| Sunderland | 39 cov | 28 CHE | 23 avl | 30 TOT | 17 liv | 27 new | 35 NFO | 44 CRY |
+| Fulham | 27 avl | 42 NEW | 12 mci | 35 BOU | 24 tot | 29 eve | 35 BRE | 28 lee |
+| Crystal Palace | 17 tot | 21 LIV | 36 cov | 49 HUL | 15 che | 20 avl | 30 MUN | 25 sun |
+| Ipswich Town | 36 hul | 26 BOU | 16 tot | 27 AVL | 34 cov | 20 lee | 32 NEW | 13 bha |
+| Coventry City | 31 SUN | 20 eve | 38 CRY | 18 lee | 40 IPS | 17 mun | 25 AVL | 15 bou |
+| Hull City | 36 IPS | 6 ars | 16 BHA | 24 cry | 25 NFO | 14 bou | 20 TOT | 5 mci |
 
 ## Data
 
-- Results up to 2026-10-20; refreshed 2026-10-23T11:17:40+00:00
-- Bookmaker odds for 21 upcoming matches (Odds API requests left this month: 493)
+- Results up to 2026-10-25; refreshed 2026-10-27T11:51:54+00:00
+- Bookmaker odds for 21 upcoming matches (Odds API requests left this month: 492)
 - Update `config/entry.toml` with each pick and any lost life.
